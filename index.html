@@ -205,7 +205,8 @@ input[type=text]{font:inherit;font-size:16px;color:var(--text);background:var(--
 .purse{font-size:12px;color:var(--muted);text-align:right}
 .purse b{font-family:var(--f-display);font-size:18px;color:var(--crit)}
 .tabs{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:4px;background:var(--board);border:1px solid var(--line);border-radius:9px;padding:4px}
-.tabs button{border:0;background:transparent;min-height:36px;padding:6px 2px;font-size:13px}
+.tabs button{border:0;background:transparent;min-height:36px;padding:6px 2px;font-size:13px;position:relative;white-space:nowrap}
+.tabs button .dot{position:absolute;top:0;right:1px;margin:0;font-size:9px;line-height:14px;padding:0 4px}
 .tabs button.on{background:var(--panel);color:var(--bronze);box-shadow:inset 0 -2px 0 var(--bronze)}
 .dot{font-style:normal;background:var(--enemy);color:var(--text);border-radius:8px;font-size:10px;padding:0 5px;margin-left:2px}
 .list{display:flex;flex-direction:column;gap:8px}
@@ -294,6 +295,7 @@ button.heroic small{color:var(--muted)}
 .dgbtns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.dgbtns button{display:flex;flex-direction:column;min-height:48px}.dgbtns small{font-size:10.5px;color:var(--muted)}
 .dlg{display:flex;flex-direction:column;gap:8px}.dlg p{margin:0;padding:8px 10px;background:var(--board);border-left:3px solid var(--bronze);border-radius:6px;font-size:13.5px}.dlg p b{display:block;color:var(--bronze);font-size:12px;margin-bottom:2px}
 .ico{display:inline-block;vertical-align:middle;margin-right:4px;background-image:url(sprites/items.webp);background-size:3000% 100%;background-repeat:no-repeat;flex:none}
+.sysbtn{width:36px;height:36px;font-size:19px;line-height:1;color:var(--bronze)}.syscard .sysh{display:flex;justify-content:space-between;align-items:center;gap:8px}.syscard .sysh button{min-height:32px;padding:4px 12px}
 .bagbtn{padding:2px;min-height:0;background:transparent;border:1px solid var(--line);border-radius:10px;margin-right:6px}.bagbtn .ico{margin:0}
 .purse{display:flex;align-items:center;gap:4px}
 .bag .baggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin:4px 0 8px}
@@ -458,6 +460,7 @@ button.primary.warnfill{background:var(--enemy);color:var(--text)}.tbar i{backgr
 .b-top{flex-wrap:wrap}.b-top>div:first-child{min-width:0;flex:1 1 150px}
 .round{white-space:nowrap}
 .btog button{min-height:30px;padding:3px 7px;font-size:11.5px;white-space:nowrap}
+.cmds .rep{border-color:color-mix(in srgb,var(--bronze) 55%,var(--line));color:var(--bronze)}.cmds .rep small{color:var(--muted)}
 .btog button[aria-pressed="true"]{background:var(--bronze);color:var(--bronze-ink);border-color:var(--bronze);font-weight:600}
 .fempty{font-size:10px;color:rgba(236,228,210,.5)}
 .g-ctl button{min-height:34px;padding:5px 10px;font-size:12px}
@@ -1211,7 +1214,7 @@ function weeklyStage(){
 }
 const mileText=r=>[r.gold?r.gold+' ตำลึง':'',r.soul?'หินวิญญาณ '+r.soul:'',r.stone?'หินตีบวก '+r.stone:'',r.brk?'หินทะลวงขีด '+r.brk:'',r.gear?GEAR[r.gear].name:''].filter(Boolean).join(' · ');
 function weeklyHTML(){
-  ensureWeekly();const W=G.weekly,left=WK_TRIES-W.used,open=G.cleared>=14;
+  ensureWeekly();const W=G.weekly,left=WK_TRIES-W.used,open=fOpen('weekly');
   return `<article class="card weekly"><div class="st-head"><span class="st-no">รีเซ็ตทุกวันจันทร์</span><h3>บอสประจำสัปดาห์</h3><span class="st-lv">เหลือ ${left}/${WK_TRIES} ครั้งวันนี้</span></div>
     <p>ลิโป้ร่างอสูรไม่มีวันล้ม สู้ได้ ${WK_ROUNDS} เทิร์นต่อครั้ง ดาเมจรวมทั้งสัปดาห์แลกรางวัลได้ ได้หินวิญญาณไว้ตื่นรู้</p>
     <div class="ssub">ดาเมจรวมสัปดาห์นี้ <b class="num" style="color:var(--crit)">${W.total.toLocaleString()}</b> · ดีที่สุดต่อครั้ง ${W.best.toLocaleString()}</div>
@@ -1277,7 +1280,7 @@ function arenaStage(o){
   return {name:'ลานประลอง · '+o.name,ch:1,lv:o.lv,mul:1,front:[],back:[],exp:0,gold:0,arena:true,opp:o,team,desc:`ประลองกับ ${o.name} (${arRank(o.rating)} ${o.rating})`};
 }
 function arenaHTML(){
-  ensureArena();const A=G.arena,left=arMax()-A.used,open=G.cleared>=4,mp=myPower();
+  ensureArena();const A=G.arena,left=arMax()-A.used,open=fOpen('arena'),mp=myPower();
   return `<article class="card arena"><div class="st-head"><span class="st-no">${rkIco(arRankIdx(A.rating),22)} ${arRank(A.rating)}</span><h3>ลานประลอง</h3><span class="st-lv">เหลือ ${left}/${arMax()} ครั้งวันนี้</span></div>
     <div class="ssub">คะแนน <b class="num" style="color:var(--crit)">${A.rating}</b> · สูงสุด ${A.best} · ชนะรวม ${A.wins} · พลังทีมคุณ ${mp.toLocaleString()}${A.firstWin?'':' · ชนะครั้งแรกของวันได้หินวิญญาณ 2'}</div>
     ${arLadder()}
@@ -1322,7 +1325,7 @@ const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth
 function ensureDaily(){
   const t=today();if(G.daily&&G.daily.date===t)return;
   const r=rng(+t.replace(/-/g,''));
-  const pool=QUEST_POOL.filter(q=>q.t!=='tower'||G.cleared>=4);
+  const pool=QUEST_POOL.filter(q=>!['tower','craft','exped','forge'].includes(q.t)||fOpen(q.t));
   const qs=[];while(qs.length<3){const q=pool[Math.floor(r()*pool.length)];if(!qs.some(x=>x.t===q.t))qs.push({t:q.t,n:q.n,txt:q.txt,prog:0});}
   qs.forEach((q,i)=>q.reward=i===2?{gold:250,stone:3,wine:1}:{gold:150,stone:2});
   G.daily={date:t,quests:qs};
@@ -1482,7 +1485,7 @@ function campHTML(){
   const tabs=[['stage','ออกศึก'],['team','ทีม'],['hero','ตัวละคร'],['exped','สำรวจ'],['shop','ร้านค้า']].filter(([k])=>fOpen(k));if(!fOpen(UI.tab))UI.tab='stage';
   return `<header class="camp-top"><div><p class="eyebrow">ค่ายพัก · บทที่ ${curCh()} ${CHAPTERS[curCh()]}</p>
       <h1>${esc(h.name)} <span class="lv">Lv ${h.lv}${h.reborn?' · จุติ '+h.reborn:''}</span></h1>${G.title?`<p class="htitle">「${esc(G.title)}」</p>`:''}</div>
-      <div class="purse"><button class="bagbtn" data-act="bag" aria-label="กระเป๋า">${ico('bag',30)}</button><div>${ico('coin',16)}<b class="num">${G.gold}</b><br>ตำลึง</div></div></header>${UI.bag?bagHTML():''}
+      <div class="purse"><button class="bagbtn sysbtn" data-act="sys" aria-label="ตั้งค่าและเซฟ">⚙</button><button class="bagbtn" data-act="bag" aria-label="กระเป๋า">${ico('bag',30)}</button><div>${ico('coin',16)}<b class="num">${G.gold}</b><br>ตำลึง</div></div></header>${UI.bag?bagHTML():''}${UI.sys?sysHTML():''}
     <nav class="tabs">${tabs.map(([k,t])=>`<button data-act="tab" data-k="${k}" class="${UI.tab===k?'on':''}">${t}${k==='exped'&&expDone()?`<i class="dot">${expDone()}</i>`:''}${k==='hero'&&(h.pts||h.sp||readyN('hero'))?`<i class="dot">${(h.pts||0)+(h.sp||0)+readyN('hero')}</i>`:''}${k==='team'&&dotTeam()?`<i class="dot">${dotTeam()}</i>`:''}${k==='shop'&&dotShop()?`<i class="dot">!</i>`:''}</button>`).join('')}</nav>
     ${UI.tab==='stage'?capBanner():''}${({stage:stageTab,team:teamTab,hero:heroTab,exped:expedTab,shop:shopTab})[UI.tab]()}${unlockPop()||loginPop()}`;
 }
@@ -1546,24 +1549,25 @@ function dungeonHTML(){ensureDungeon();const D=G.dungeon,fix=DG_DAY[new Date().g
   return `<div class="card dgcard"><div class="g-name">ถ้ำธาตุประจำวัน · ${fix?badge(fix)+' วันนี้ธาตุ'+ELS[fix].t:'สุดสัปดาห์ เลือกธาตุได้'}</div>
     ${fix?'':`<div class="chips">${Object.keys(ELS).map(e=>`<button class="chip ${el===e?'on':''}" data-act="dgEl" data-k="${e}">${badge(e)}</button>`).join('')}</div>`}
     <p class="ssub">รางวัล: วัตถุดิบ ${R.m.map(k=>MATS[k].name).join('/')} จำนวนมาก · อัญมณี ${R.g.map(k=>GEMS[k].n).join('/')} · หินตีบวก · เหลือ ${DG_TRIES-D.used}/${DG_TRIES} ครั้งวันนี้ (ชนะเท่านั้นที่นับ)</p>
-    <div class="dgbtns">${DG_LV.map((L,d)=>`<button data-act="dgFight" data-d="${d}" ${G.cleared<L.u||D.used>=DG_TRIES?'disabled':''}><b>${L.n}</b><small>${G.cleared<L.u?`ผ่าน ${L.u} ด่าน`:`Lv ${L.lv}`}</small></button>`).join('')}</div></div>`;}
+    <div class="dgbtns">${DG_LV.map((L,d)=>`<button data-act="dgFight" data-d="${d}" ${G.cleared<L.u||D.used>=DG_TRIES?'disabled':''}><b>${L.n}</b><small>${G.cleared<L.u?`ผ่าน ${L.u} ด่าน`:`Lv ${dispLv(L.lv)}`}</small></button>`).join('')}</div></div>`;}
 const FEAT=[
- {k:'daily',u:1,n:'ภารกิจรายวัน',d:'หน้าออกศึก · ทำภารกิจ 3 อย่างต่อวันเพื่อรับรางวัล'},
- {k:'ach',u:1,n:'ความสำเร็จ',d:'หน้าออกศึก · ทำเป้าหมายต่างๆ รับรางวัลและฉายาโชว์ใต้ชื่อ'},
  {k:'forge',u:2,n:'ตีบวกอุปกรณ์',d:'ร้านค้า › ตีบวก · ใช้หินตีบวกเพิ่มพลังอาวุธและเกราะ'},
- {k:'exped',u:3,n:'สำรวจ',d:'แท็บสำรวจ · ส่งขุนพลนอกทีมไปหาวัตถุดิบ EXP และทอง แม้ปิดเกมอยู่'},
  {k:'sell',u:3,n:'ขายของ',d:'ร้านค้า › ขาย · ขายอุปกรณ์ที่ไม่ใช้แล้วเป็นทอง'},
- {k:'tower',u:4,n:'หอท้าประลอง',d:'หน้าออกศึก · ไต่ชั้นหอ ยิ่งสูงรางวัลยิ่งดี'},
- {k:'arena',u:4,n:'ลานประลอง',d:'หน้าออกศึก · ท้าทีมคู่แข่งเพื่อไต่อันดับ'},
- {k:'slot',u:5,n:'สล็อตนำโชค',d:'ร้านค้า › สล็อต · ใช้ตำลึงหมุนกระดานลุ้นของหายาก ไม่ชอบของบนกระดานกดเปลี่ยนได้'},
- {k:'craft',u:5,n:'คราฟต์',d:'ร้านค้า › คราฟต์ · ใช้วัตถุดิบจากการสำรวจสร้างอุปกรณ์และยา'},
- {k:'gem',u:7,n:'อัญมณี',d:'ร้านค้า › อัญมณี · เจาะรูอุปกรณ์แล้วฝังอัญมณีเพิ่มค่าพลัง'},
- {k:'train',u:8,n:'สำนักฝึก',d:'ร้านค้า › สำนักฝึก · ใช้ทองฝึกค่าพลังให้ขุนพล'},
- {k:'dungeon',u:9,n:'ถ้ำธาตุ',d:'หน้าออกศึก · ดันเจี้ยนรายวัน ได้วัตถุดิบและอัญมณีจำนวนมาก'},
- {k:'elchg',u:9,n:'เปลี่ยนธาตุ',d:'แท็บตัวละคร · ใช้ศิลาเปลี่ยนธาตุตัวหลักได้โดยไม่ต้องจุติ'},
- {k:'market',u:10,n:'ตลาดมืด',d:'ร้านค้า › ตลาดมืด · ของหายากสุ่มใหม่ทุกวัน'},
- {k:'weekly',u:14,n:'บอสสัปดาห์',d:'หน้าออกศึก · ท้าลิโป้ร่างอสูร ยิ่งทำดาเมจมากรางวัลยิ่งดี'}];
-const fOpen=k=>{const f=FEAT.find(x=>x.k===k);return !f||G.cleared>=f.u;};
+ {k:'daily',u:4,n:'ภารกิจรายวัน',d:'หน้าออกศึก · ทำภารกิจ 3 อย่างต่อวันเพื่อรับรางวัล'},
+ {k:'exped',u:4,n:'สำรวจ',d:'แท็บสำรวจ · ส่งขุนพลนอกทีมไปหาวัตถุดิบ EXP และทอง แม้ปิดเกมอยู่'},
+ {k:'ach',u:6,n:'ความสำเร็จ',d:'หน้าออกศึก · ทำเป้าหมายต่างๆ รับรางวัลและฉายาโชว์ใต้ชื่อ'},
+ {k:'tower',u:9,n:'หอท้าประลอง',d:'หน้าออกศึก · ไต่ชั้นหอ ยิ่งสูงรางวัลยิ่งดี'},
+ {k:'craft',u:11,n:'คราฟต์',d:'ร้านค้า › คราฟต์ · ใช้วัตถุดิบจากการสำรวจสร้างอุปกรณ์และยา'},
+ {k:'arena',u:14,n:'ลานประลอง',d:'หน้าออกศึก · ท้าทีมคู่แข่งเพื่อไต่อันดับ'},
+ {k:'gem',u:16,n:'อัญมณี',d:'ร้านค้า › อัญมณี · เจาะรูอุปกรณ์แล้วฝังอัญมณีเพิ่มค่าพลัง'},
+ {k:'slot',u:19,n:'สล็อตนำโชค',d:'ร้านค้า › สล็อต · ใช้ตำลึงหมุนกระดานลุ้นของหายาก ไม่ชอบของบนกระดานกดเปลี่ยนได้'},
+ {k:'dungeon',u:19,n:'ถ้ำธาตุ',d:'หน้าออกศึก · ดันเจี้ยนรายวัน ได้วัตถุดิบและอัญมณีจำนวนมาก'},
+ {k:'train',u:21,n:'สำนักฝึก',d:'ร้านค้า › สำนักฝึก · ใช้ทองฝึกค่าพลังให้ขุนพล'},
+ {k:'market',u:24,n:'ตลาดมืด',d:'ร้านค้า › ตลาดมืด · ของหายากสุ่มใหม่ทุกวัน'},
+ {k:'weekly',u:24,n:'บอสสัปดาห์',d:'หน้าออกศึก · ท้าลิโป้ร่างอสูร ยิ่งทำดาเมจมากรางวัลยิ่งดี'},
+ {k:'elchg',u:29,n:'เปลี่ยนธาตุ',d:'แท็บตัวละคร · ใช้ศิลาเปลี่ยนธาตุตัวหลักได้โดยไม่ต้องจุติ'}]
+const fOpen=k=>{const f=FEAT.find(x=>x.k===k);return !f||G.cleared>=f.u||!!(G.unl&&G.unl.includes(k));};
+const fAt=k=>(FEAT.find(x=>x.k===k)||{u:0}).u;
 function unlockPop(){const nw=FEAT.filter(f=>G.cleared>=f.u&&!G.unl.includes(f.k));if(!nw.length)return '';
   return `<div class="unlockpop" role="dialog" aria-modal="true"><div class="unlockbox"><p class="eyebrow">ระบบใหม่</p><h2>ปลดล็อกระบบใหม่!</h2>
     ${nw.map(f=>`<div class="unl"><b>${f.n}</b><small>${f.d}</small></div>`).join('')}<button class="primary" data-act="unlockOk">รับทราบ</button></div></div>`;}
@@ -1623,21 +1627,21 @@ function idleSpr(key,k){const M=SPR_META[key],a=SPR_ADJ[key];if(!M||!SPR_FILE[ke
   return `<div class="idlespr" style="width:${M.cw*k}px;height:${hh*k}px;background-image:url(${SPR_FILE[key]});background-size:${M.cw*M.cols*k}px ${M.ch*M.rows*k}px;background-position:0 ${-(Math.max(0,r)*M.ch+top)*k}px;--ex:${-n*M.cw*k}px;animation-duration:${n*0.18}s;animation-timing-function:steps(${n})"></div>`;}
 function stageTab(){
   const party=[esc(G.hero.name),...G.party.map(k=>GEN[k].name)];
-  const tOpen=G.cleared>=4,tb=G.tower.best,nf=Math.min(TOWER_MAX,tb+1);
+  const tOpen=fOpen('tower'),tb=G.tower.best,nf=Math.min(TOWER_MAX,tb+1);
   const qs=G.daily.quests,qClaim=qs.filter(q=>!q.claimed&&q.prog>=q.n).length,qDone=qs.filter(q=>q.claimed).length;
   const nextI=Math.min(G.cleared,STAGES.length-1),allDone=G.cleared>=STAGES.length,ns=STAGES[nextI];
   const chs=[...new Set(STAGES.map(s=>s.ch))],cur=UI.stCh||ns.ch;
   const hub=`<div class="hub">
     <button class="hubt map" data-act="mapOpen"><b>แผนที่</b><small>${(G.map&&MAPS[G.map.r])?MAPS[G.map.r].name:MAPS[1].name} · ${Object.keys(MAPS).filter(regionOpen).length}/${Object.keys(MAPS).length} เขต</small></button>
     ${fOpen('tower')?`<button class="hubt tw ${UI.showTower?'on':''}" data-act="toggleTower" ${tOpen?'':'disabled'}><b>หอท้าประลอง${tOpen&&twUnclaimed().length?` <i class="dot">${twUnclaimed().length}</i>`:''}</b><small>${tOpen?`ท้าชั้น ${nf} · สูงสุด ${tb}`:'จบบทที่ 1 ก่อน'}</small></button>`:''}
-    ${fOpen('arena')?`<button class="hubt ar ${UI.showArena?'on':''}" data-act="toggleArena"><b>ลานประลอง${G.cleared>=4&&G.arena&&(G.arena.used<arMax()||G.arena.salDay!==today()||arUnclaimed().length)?` <i class="dot">${G.arena.used<arMax()?arMax()-G.arena.used:'!'}</i>`:''}</b><small>${G.cleared>=4?(G.arena?rkIco(arRankIdx(G.arena.rating),15)+' '+arRank(G.arena.rating)+' '+G.arena.rating:'ท้าทีมผู้เล่นอื่น'):'จบบทที่ 1 ก่อน'}</small></button>`:''}
-    ${fOpen('weekly')?`<button class="hubt wk ${UI.showWeekly?'on':''}" data-act="toggleWeekly"><b>บอสสัปดาห์${G.cleared>=14&&G.weekly&&G.weekly.used<WK_TRIES?` <i class="dot">${WK_TRIES-G.weekly.used}</i>`:''}</b><small>${G.cleared>=14?'ลิโป้ร่างอสูร':'จบบทที่ 4 ก่อน'}</small></button>`:''}
-    ${fOpen('dungeon')?`<button class="hubt dg ${UI.showDg?'on':''}" data-act="toggleDg"><b>ถ้ำธาตุ${G.cleared>=9&&(!G.dungeon||G.dungeon.date!==today()||G.dungeon.used<DG_TRIES)?` <i class="dot">${G.dungeon&&G.dungeon.date===today()?DG_TRIES-G.dungeon.used:DG_TRIES}</i>`:''}</b><small>${G.cleared>=9?(DG_DAY[new Date().getDay()]?'วันนี้ธาตุ'+ELS[DG_DAY[new Date().getDay()]].t:'เลือกธาตุได้'):'ผ่าน 9 ด่านก่อน'}</small></button>`:''}
+    ${fOpen('arena')?`<button class="hubt ar ${UI.showArena?'on':''}" data-act="toggleArena"><b>ลานประลอง${fOpen('arena')&&G.arena&&(G.arena.used<arMax()||G.arena.salDay!==today()||arUnclaimed().length)?` <i class="dot">${G.arena.used<arMax()?arMax()-G.arena.used:'!'}</i>`:''}</b><small>${G.cleared>=4?(G.arena?rkIco(arRankIdx(G.arena.rating),15)+' '+arRank(G.arena.rating)+' '+G.arena.rating:'ท้าทีมผู้เล่นอื่น'):'จบบทที่ 1 ก่อน'}</small></button>`:''}
+    ${fOpen('weekly')?`<button class="hubt wk ${UI.showWeekly?'on':''}" data-act="toggleWeekly"><b>บอสสัปดาห์${fOpen('weekly')&&G.weekly&&G.weekly.used<WK_TRIES?` <i class="dot">${WK_TRIES-G.weekly.used}</i>`:''}</b><small>${G.cleared>=14?'ลิโป้ร่างอสูร':'จบบทที่ 4 ก่อน'}</small></button>`:''}
+    ${fOpen('dungeon')?`<button class="hubt dg ${UI.showDg?'on':''}" data-act="toggleDg"><b>ถ้ำธาตุ${fOpen('dungeon')&&(!G.dungeon||G.dungeon.date!==today()||G.dungeon.used<DG_TRIES)?` <i class="dot">${G.dungeon&&G.dungeon.date===today()?DG_TRIES-G.dungeon.used:DG_TRIES}</i>`:''}</b><small>${G.cleared>=9?(DG_DAY[new Date().getDay()]?'วันนี้ธาตุ'+ELS[DG_DAY[new Date().getDay()]].t:'เลือกธาตุได้'):'ผ่าน 9 ด่านก่อน'}</small></button>`:''}
     ${fOpen('daily')?`<button class="hubt dq ${UI.showDaily?'on':''}" data-act="toggleDaily"><b>ภารกิจรายวัน${qClaim?` <i class="dot">${qClaim}</i>`:''}</b><small>รับแล้ว ${qDone}/3</small></button>`:''}
     ${fOpen('ach')?`<button class="hubt ac ${UI.showAch?'on':''}" data-act="toggleAch"><b>${achIco(0,18)} ความสำเร็จ${achReadyAll()?` <i class="dot">${achReadyAll()}</i>`:''}</b><small>${G.title?'ฉายา: '+esc(G.title):'รับรางวัลและฉายา'}</small></button>`:''}
   </div>`;
   const next=allDone?endgameHTML()
-    :`<div class="nextcard"><div><p class="eyebrow">ด่านถัดไป · บทที่ ${ns.ch} ด่าน ${nextI+1}</p><b>${ns.name}</b><small>แนะนำ Lv ${ns.lv} · ${ns.exp} EXP · ${ns.gold} ตำลึง</small><small>${intelHTML(nextI)}</small>${ns.lv>maxLv(G.hero)+2?`<small class="capwarn">⚠ ด่านนี้เกินเลเวลตันของตัวหลัก (Lv ${maxLv(G.hero)}) ถ้าผ่านยาก ควรจุติก่อน</small>`:''}</div>
+    :`<div class="nextcard"><div><p class="eyebrow">ด่านถัดไป · บทที่ ${ns.ch} ด่าน ${nextI+1}</p><b>${ns.name}</b><small>แนะนำ Lv ${dispLv(ns.lv)} · ${ns.exp} EXP · ${ns.gold} ตำลึง</small><small>${intelHTML(nextI)}</small>${ns.lv>maxLv(G.hero)+2?`<small class="capwarn">⚠ ด่านนี้เกินเลเวลตันของตัวหลัก (Lv ${maxLv(G.hero)}) ถ้าผ่านยาก ควรจุติก่อน</small>`:''}</div>
       <div class="nextbtns"><button class="primary" data-act="fight" data-i="${nextI}">ออกศึก</button><button data-act="autoTeam">จัดทีมตามธาตุ</button></div></div>${UI.tab==='stage'&&UI.quickMsg?`<p class="forgemsg ok">${UI.quickMsg}</p>`:''}`;
   const chips=`<div class="chips chtabs">${chs.map(c=>{const idx=STAGES.map((s,i)=>s.ch===c?i:-1).filter(i=>i>=0),lock=idx[0]>G.cleared,dn=idx.filter(i=>i<G.cleared).length;
     return `<button class="chip ${cur===c?'on':''}" data-act="stCh" data-c="${c}" ${lock?'disabled':''}>บท ${c}${lock?' 🔒':` · ${dn}/${idx.length}`}</button>`;}).join('')}</div>`;
@@ -1651,7 +1655,7 @@ function stageTab(){
     const tags=[done?'<span class="tg ok">ผ่าน</span>':'',G.heroic[i]?'<span class="tg gold">★ ยาก</span>':'',(G.legendC||{})[i]?'<span class="tg leg">★★ ตำนาน</span>':'',rec.length?'<span class="tg rc">✦ จับได้</span>':'',s.joins&&!G.roster[s.joins]?'<span class="tg rc">+ ขุนพล</span>':'',Object.keys(PW).some(m=>PW[m].src.h===i&&!G.pwGot[m])?'<span class="tg gold">อาวุธประจำตัว</span>':'',s.rare&&s.rare.length?'<span class="tg rare">💎 ของหายาก</span>':'',G.heroic[i]&&!(G.legendC||{})[i]?'<span class="tg leg">ตำนาน ▸</span>':''].join('');
     return `<div class="strow ${lock?'locked':''} ${i===nextI&&!allDone?'next':''}">
       <button class="stmain" data-act="stOpen" data-i="${i}" ${lock?'disabled':''} aria-expanded="${open}"><span class="stn">${i+1}</span>
-        <span class="stt"><b>${s.name} ${done?starStr(G.stars[i]):''}</b><small>Lv ${s.lv}${lock?' · ยังไม่ปลดล็อก':''}</small><span class="tgs">${tags}</span></span></button>
+        <span class="stt"><b>${s.name} ${done?starStr(G.stars[i]):''}</b><small>Lv ${dispLv(s.lv)}${lock?' · ยังไม่ปลดล็อก':''}</small><span class="tgs">${tags}</span></span></button>
       <div class="stb">${lock?'':`<button class="${done?'':'primary'}" data-act="fight" data-i="${i}">สู้</button>`}${done&&G.stars[i]===3?`<button class="sweep" data-act="sweep" data-i="${i}" data-n="1" ${G.sweep.n>=SWEEP_MAX?'disabled':''}>กวาด</button>`:''}${done?`<button class="heroic" data-act="fightH" data-i="${i}">ยาก</button>`:''}</div>
       ${open?`<div class="stdet"><p>${s.desc}</p><p class="ssub">ดาว: ชนะ ★ · ไม่มีใครล้ม ★ · จบใน ${starLim(s)} เทิร์น ★${G.stars[i]===3?` · <button class="linkbtn" data-act="sweep" data-i="${i}" data-n="5" ${G.sweep.n+5>SWEEP_MAX?'disabled':''}>กวาด ×5</button>`:''}</p><p class="ssub">รางวัล ${s.exp} EXP · ${s.gold} ตำลึง${done?` · โหมดยาก Lv ${heroicStage(i).lv} รางวัล ×2`:''}${rec.length?`<br>เกลี้ยกล่อมได้: ${rec.join(', ')}`:''}${s.joins&&!G.roster[s.joins]?`<br>ผ่านครั้งแรก: ${GEN[s.joins].name} ขอเข้าร่วมทัพ`:''}${pwHint(i)}${rareHTML(s.rare,s.hard?0.4:0.18,'ของหายาก:')}${done?rareHTML(heroicStage(i).rare,0.35,'ของหายากโหมดยาก:'):''}${G.heroic[i]?`<br><button class="heroic legendb" data-act="fightL" data-i="${i}" style="margin:6px 0 2px;min-height:36px">⚔ สู้โหมดตำนาน</button><br>โหมดตำนาน Lv ${legendStage(i).lv} · รางวัล ×3.5 · <b style="color:#f0b030">ดรอปของระดับตำนาน</b> (โอกาสราว 35%) · ผ่านครั้งแรกได้หินทะลวงขีด 2 หินวิญญาณ 2 และของตำนาน 1 ชิ้น`:''}</p></div>`:''}
     </div>`;}).join('');
@@ -1760,7 +1764,7 @@ function readyN(id){const o=memberObj(id);let n=0;if(o.lv>=maxLv(o)&&(o.reborn||
   if((o.reborn||0)>=MAX_REB){const a=awk(o),c=awkCost(a);if(a<AWK_MAX&&o.lv>=baseCap(o)&&G.items.soul>=c.soul&&G.gold>=c.gold)n++;const b=brkN(o),bc=brkCost(b);if(b<BRK_MAX&&o.lv>=maxLv(o)&&G.items.brk>=bc.brk&&G.gold>=bc.gold)n++;}return n;}
 function dotTeam(){return G.party.reduce((t,k)=>t+readyN(k),0)+(planEquip().changes?1:0);}
 function gemMergeN(){return Object.entries(G.gems||{}).filter(([k,n])=>n>=3&&+k.split(':')[1]<GEM_MAX).length;}
-function dotShop(){return (G.cleared>=10&&(!G.market||G.market.date!==today())?1:0)+(gemMergeN()?1:0);}
+function dotShop(){return (fOpen('market')&&(!G.market||G.market.date!==today())?1:0)+(gemMergeN()?1:0);}
 const ZHEN={none:{n:'ไม่ใช้ค่ายกล',u:0,d:'ไม่มีโบนัส'},
   wing:{n:'ค่ายกลปีกกา',u:4,req:{front:2},d:'แนวหน้า ATK +12% · แนวหลัง SPD +8',f:{atk:.12},b:{spd:8}},
   scale:{n:'ค่ายกลเกล็ดมังกร',u:9,req:{front:3},d:'แนวหน้า DEF +20% HP +10%',f:{def:.2,hp:.1}},
@@ -1963,8 +1967,19 @@ function craftPane(){
       return row(`${gname(x)} <span class="stag">${SLOTS[GEAR[x.id].slot]}${own?' · '+esc(memberName(own)):''}</span>`,gtext(x)+`<br>${c.gold.toLocaleString()} ตำลึง · หยก ${G.mats.jade||0}/1`,`<button class="${cf?'warn':''}" data-act="reforge" data-u="${x.u}" ${G.gold>=c.gold&&(G.mats.jade||0)>=1?'':'disabled'}>${cf?'ยืนยัน':'ร่ายใหม่'}</button>`);}).join('')||'<p class="partyline">ยังไม่มีอุปกรณ์คราฟต์</p>'}</div>`;}
   return head+(ck==='gear'?slotChips():'')+`<p class="partyline">${ck==='gear'?'อุปกรณ์คราฟต์แรงกว่าของร้านขั้นเดียวกัน และสุ่มคุณภาพ: ธรรมดา 45% · ดี 30% · หายาก 18% · ตำนาน 7% (ค่าพิเศษ ×1.5)':'วัตถุดิบได้จากการชนะศึกและส่งขุนพลออกสำรวจ'}</p><div class="slist">${rows}</div>`;
 }
+function heroSub(){const h=G.hero,ht=UI.heroTab||'stat',T=[['stat','ค่าพลัง',h.pts||0],['skill','สกิล',h.sp||0],['reb','จุติ',readyN('hero')]];
+  return `<nav class="subtabs s3">${T.map(([k,n,d])=>`<button data-act="heroTab" data-k="${k}" class="${ht===k?'on':''}" aria-pressed="${ht===k}">${n}${d?`<i class="pip" aria-label="${d}"></i>`:''}</button>`).join('')}</nav>`;}
+function sysHTML(){return `<div class="card syscard"><div class="sysh"><div class="g-name">ตั้งค่า · เซฟเกม</div><button data-act="sys" aria-label="ปิด">ปิด</button></div>
+<div class="g-name" style="font-size:14px;margin-top:4px">ย้ายเซฟ</div><p class="ssub" style="margin:0">ง่ายสุด: กด "บันทึกเป็นไฟล์" แล้ว AirDrop ไฟล์ไปอีกเครื่อง จากนั้นกด "เปิดไฟล์เซฟ" · หรือคัดลอกรหัสไปวาง</p>
+    <div class="stbtns"><button data-act="saveFile">บันทึกเป็นไฟล์</button><button data-act="saveFileIn">เปิดไฟล์เซฟ</button></div>
+    <div class="stbtns"><button data-act="saveOut">คัดลอกรหัสเซฟ</button><button data-act="saveInOpen">วางรหัสเซฟ</button></div>
+    ${UI.fileSave?`<div class="elconfirm"><p>นำเข้าเซฟ ${esc(UI.fileSave.hero.name)} Lv ${UI.fileSave.hero.lv} · ผ่าน ${UI.fileSave.cleared||0} ด่าน? เซฟปัจจุบันในเครื่องนี้จะถูกแทนที่</p><div class="cmds"><button data-act="saveFileNo">ยกเลิก</button><button class="primary" data-act="saveFileOk">ยืนยันนำเข้า</button></div></div>`:''}
+    ${UI.saveIO?`<textarea id="saveBox" class="savebox" rows="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="วางรหัสเซฟที่นี่">${UI.saveIO==='out'?esc(saveCode()):''}</textarea>${UI.saveIO==='in'?`<div class="stbtns"><button class="primary ${UI.confirmImp?'warn':''}" data-act="saveIn">${UI.confirmImp?'กดอีกครั้ง: เซฟปัจจุบันจะถูกแทนที่':'นำเข้า'}</button></div>`:''}`:''}
+    ${UI.saveMsg?`<p class="forgemsg ${UI.saveMsg.ok?'ok':'bad'}">${UI.saveMsg.t}</p>`:''}
+  <div class="resetzone"><span class="savenote">${saveNote()}</span><button data-act="reset" class="${UI.confirmReset?'warn':''}">${UI.confirmReset?'กดอีกครั้งเพื่อลบเซฟและเริ่มใหม่':'เริ่มเกมใหม่'}</button></div>
+  </div>`;}
 function heroTab(){
-  const h=G.hero,s=heroStats(),b=gearBonus('hero');
+  const h=G.hero,s=heroStats(),b=gearBonus('hero'),ht=UI.heroTab||'stat';
   syncHeroSpr();const e=eqOf('hero'),pw=powOf(memberStats('hero'));
   return `<div class="card herocard"><div class="hcwrap"><div class="hcspr">${idleSpr('hero_'+h.el,0.62)}</div><div class="hcinfo">
     <div class="g-name" style="font-size:16px">${esc(h.name)} ${badge(h.el)} <span class="lv">Lv ${h.lv}${h.reborn?' · จุติ '+h.reborn:''}</span></div>
@@ -1973,13 +1988,14 @@ function heroTab(){
     <button data-act="heroEq" class="hceq">${UI.eq==='hero'?'ปิดอุปกรณ์':'เปลี่ยนอุปกรณ์'}</button></div></div>
     <div class="expbar"><div class="g-sub num">${h.lv>=maxLv(h)?`เลเวลตัน ${h.lv}/${maxLv(h)} · EXP ส่วนเกินแลกเป็นตำลึง`:`EXP ${h.exp}/${need(h.lv,h.reborn)} · เลเวลตัน ${maxLv(h)}`}</div><div class="bar"><i style="width:${h.lv>=maxLv(h)?100:Math.min(100,h.exp/need(h.lv,h.reborn)*100)}%"></i></div></div>${UI.eq==='hero'?equipHTML('hero'):''}
   </div>
-  ${fOpen('elchg')||G.items.elChg||h.reborn?`<div class="card"><div class="g-name">เปลี่ยนธาตุ <small style="color:var(--muted)">ศิลาเปลี่ยนธาตุ ${G.items.elChg} ชิ้น</small></div>
+  ${heroSub()}
+  ${ht==='stat'&&(fOpen('elchg')||G.items.elChg||h.reborn)?`<div class="card"><div class="g-name">เปลี่ยนธาตุ <small style="color:var(--muted)">ศิลาเปลี่ยนธาตุ ${G.items.elChg} ชิ้น</small></div>
     <p class="ssub" style="margin:4px 0">ธาตุปัจจุบัน ${badge(h.el)} ${ELS[h.el].t} · เปลี่ยนแล้วสเตตัสพื้นฐานและชุดสกิลเปลี่ยนตามธาตุใหม่ แต้มสกิลคืนทั้งหมด แต้มสเตตัสที่แจกไว้คงเดิม</p>
     <div class="pick">${Object.keys(HERO).filter(e=>e!==h.el).map(e=>`<button data-act="elChg" data-el="${e}" class="${UI.confirmEl===e?'on':''}" ${G.items.elChg?'':'disabled'}><span class="ptop">${badge(e)} ธาตุ${ELS[e].t}${UI.confirmEl===e?' ✓':''}</span><small>${HERO[e].note}</small></button>`).join('')}</div>
     ${UI.confirmEl?`<div class="elconfirm"><p>เปลี่ยนเป็น ${badge(UI.confirmEl)} ธาตุ${ELS[UI.confirmEl].t}? ใช้ศิลา 1 ชิ้น แต้มสกิลคืนทั้งหมด</p><div class="cmds"><button data-act="elCancel">ยกเลิก</button><button class="primary" data-act="elChg" data-go="1" data-el="${UI.confirmEl}">ยืนยันเปลี่ยน</button></div></div>`:''}
     ${G.items.elChg?'':'<p class="ssub" style="margin:4px 0">ซื้อศิลาเปลี่ยนธาตุได้ที่ร้านค้า หมวดไอเทมพิเศษ</p>'}${UI.elMsg?`<p class="forgemsg ok">${UI.elMsg}</p>`:''}</div>`:''}
-  <div class="card"><div class="g-name">สกิล</div>${skillPanel('hero')}</div>
-  <div class="card">
+  ${ht==='skill'?`<div class="card"><div class="g-name">สกิล</div>${skillPanel('hero')}</div>`:''}
+  ${ht==='stat'?`<div class="card">
     ${G.statFixMsg?`<p class="forgemsg ok">ปรับสมดุล: แต้มสเตตัสเดิมสะสมข้ามการจุติจนตัวหลักแรงเกิน ระบบคืนแต้มให้แจกใหม่ ${h.pts} แต้ม (ตามเลเวลปัจจุบัน + โบนัสจุติ)</p>`:''}
     <div class="g-name">แต้มสเตตัสคงเหลือ <span class="num" style="color:var(--crit)">${h.pts}</span></div>
     <div class="skauto"><p style="margin:0">ได้ 3 แต้มทุกเลเวล แจกเองแบบ TS</p>
@@ -1989,15 +2005,8 @@ function heroTab(){
       <span class="sv">${s[k]+b[k]}${b[k]?` <small style="color:var(--heal);font-weight:500">(+${b[k]})</small>`:''}</span><span class="sbtns"><button class="hold" data-act="alloc" data-s="${k}" data-n="1" ${h.pts?'':'disabled'} aria-label="เพิ่ม${STAT_T[k]} 1">+1</button><button data-act="alloc" data-s="${k}" data-n="10" ${h.pts?'':'disabled'} aria-label="เพิ่ม${STAT_T[k]} 10">+10</button><button class="${UI.confirmAll===k?'warn':''}" data-act="alloc" data-s="${k}" data-n="all" ${h.pts?'':'disabled'} aria-label="ใส่แต้มที่เหลือทั้งหมดใน${STAT_T[k]}">${UI.confirmAll===k?'ยืนยัน':'หมด'}</button></span>`).join('')}</div>
     ${h.pts?`<div class="presets"><span class="ssub">แจกอัตโนมัติ ${h.pts} แต้ม:</span>${Object.entries(PRESET).map(([k,p])=>`<button data-act="allocPreset" data-p="${k}">${p.name}</button>`).join('')}</div>`:''}
     <p class="ssub" style="margin:0">กดค้างที่ +1 เพื่อเพิ่มต่อเนื่อง</p>
-  </div>
-  ${h.lv>=30||h.reborn?rebornHTML():`<p class="ssub" style="margin:0">ระบบจุติจะเปิดเมื่อตัวหลักถึง Lv 30</p>`}
-  <div class="card"><div class="g-name">ย้ายเซฟ</div><p class="ssub" style="margin:0">ง่ายสุด: กด "บันทึกเป็นไฟล์" แล้ว AirDrop ไฟล์ไปอีกเครื่อง จากนั้นกด "เปิดไฟล์เซฟ" · หรือคัดลอกรหัสไปวาง</p>
-    <div class="stbtns"><button data-act="saveFile">บันทึกเป็นไฟล์</button><button data-act="saveFileIn">เปิดไฟล์เซฟ</button></div>
-    <div class="stbtns"><button data-act="saveOut">คัดลอกรหัสเซฟ</button><button data-act="saveInOpen">วางรหัสเซฟ</button></div>
-    ${UI.fileSave?`<div class="elconfirm"><p>นำเข้าเซฟ ${esc(UI.fileSave.hero.name)} Lv ${UI.fileSave.hero.lv} · ผ่าน ${UI.fileSave.cleared||0} ด่าน? เซฟปัจจุบันในเครื่องนี้จะถูกแทนที่</p><div class="cmds"><button data-act="saveFileNo">ยกเลิก</button><button class="primary" data-act="saveFileOk">ยืนยันนำเข้า</button></div></div>`:''}
-    ${UI.saveIO?`<textarea id="saveBox" class="savebox" rows="4" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="วางรหัสเซฟที่นี่">${UI.saveIO==='out'?esc(saveCode()):''}</textarea>${UI.saveIO==='in'?`<div class="stbtns"><button class="primary ${UI.confirmImp?'warn':''}" data-act="saveIn">${UI.confirmImp?'กดอีกครั้ง: เซฟปัจจุบันจะถูกแทนที่':'นำเข้า'}</button></div>`:''}`:''}
-    ${UI.saveMsg?`<p class="forgemsg ${UI.saveMsg.ok?'ok':'bad'}">${UI.saveMsg.t}</p>`:''}</div>
-  <div class="resetzone"><span class="savenote">${saveNote()}</span><button data-act="reset" class="${UI.confirmReset?'warn':''}">${UI.confirmReset?'กดอีกครั้งเพื่อลบเซฟและเริ่มใหม่':'เริ่มเกมใหม่'}</button></div>`;
+  </div>`:''}
+  ${ht==='reb'?(h.lv>=30||h.reborn?rebornHTML():`<div class="card"><p class="ssub" style="margin:0">ระบบจุติจะเปิดเมื่อตัวหลักถึง Lv 30 · ตอนนี้ Lv ${h.lv}</p></div>`):''}`;
 }
 
 const SELL_GM=[1,1.2,1.6,2.2,3.2,1];
@@ -2104,7 +2113,7 @@ const mkTag=o=>{const r=mkGrade(o);return `<span class="gtag" style="color:${GRA
 const mkName=o=>(o.t==='item'?ico(o.k,22):o.t==='gem'?ico('g_'+o.k.split(':')[0],22):'')+(o.t==='gear'?`${GEAR[o.k].name} +${o.plus}`:o.t==='gem'?'อัญมณี'+gemName(o.k):ITEMS[o.k].name+(o.n>1?' ×'+o.n:''));
 const mkSub=o=>o.t==='gear'?gtext({id:o.k,plus:o.plus})+` · ${SLOTS[GEAR[o.k].slot]}`:o.t==='gem'?gemText(o.k):ITEMS[o.k].desc;
 function marketPane(){
-  if(G.cleared<10)return '<p class="partyline">ตลาดมืดเปิดเมื่อผ่านด่านที่ 10</p>';
+  if(!fOpen('market'))return `<p class="partyline">ตลาดมืดเปิดเมื่อผ่านด่านที่ ${fAt('market')}</p>`;
   ensureMarket();const M=G.market,rc=rerollCost(M.rolls);
   return `<p class="partyline">ของหายากสุ่มใหม่ทุกวัน ซื้อได้อย่างละครั้ง · สุ่มใหม่ครั้งถัดไปราคาเพิ่มขึ้นเรื่อยๆ</p>
     <div class="slist">${M.list.map((o,i)=>row(`<span style="color:${GRADE[mkGrade(o)].c}">${mkName(o)}</span> ${mkTag(o)}`,mkSub(o)+(o.t==='gear'&&gdrop(o.k)?`<br><span class="ssub">${gdrop(o.k)} · หาไม่ได้จากร้านค้า</span>`:mkGrade(o)>=3?'<br><span class="ssub">หาได้ยาก ปกติได้จากบอสหรือกิจกรรมเท่านั้น</span>':''),o.sold?'<button disabled>ขายแล้ว</button>':`<button data-act="mkBuy" data-i="${i}" ${G.gold<o.p?'disabled':''}>${o.p.toLocaleString()}</button>`,o.sold?'sold':'')).join('')}</div>
@@ -2197,7 +2206,7 @@ async function doSlotSpin(times=1){const S=ensureSlot();if(UI.slotSpin||G.gold<s
   save();if(G&&UI.tab==='shop'&&UI.shopTab==='slot')render();}
 function shopTab(){
   const tabs=[['buy','ซื้อ'],['forge','ตีบวก'],['gem','อัญมณี'],['train','สำนักฝึก'],['market','ตลาดมืด'],['slot','สล็อต'],['craft','คราฟต์'],['sell','ขาย']].filter(([k])=>fOpen(k)),t=fOpen(UI.shopTab||'buy')?(UI.shopTab||'buy'):'buy';
-  const sd={market:G.cleared>=10&&(!G.market||G.market.date!==today())?'ใหม่':'',gem:gemMergeN()?'รวมได้':''};
+  const sd={market:fOpen('market')&&(!G.market||G.market.date!==today())?'ใหม่':'',gem:gemMergeN()?'รวมได้':''};
   return `<nav class="subtabs">${tabs.map(([k,n])=>`<button data-act="shopTab" data-k="${k}" class="${t===k?'on':''}" aria-pressed="${t===k}">${n}${sd[k]?`<i class="pip" aria-label="${sd[k]}"></i>`:''}</button>`).join('')}</nav>
     ${shopMsg()}${({buy:buyPane,forge:forgePane,gem:gemPane,train:trainPane,market:marketPane,slot:slotPane,craft:craftPane,sell:sellPane})[t]()}`;
 }
@@ -2294,6 +2303,8 @@ function startBattle(i,stage){syncHeroSpr();
   if(!stage&&i>=0&&DLG[i]&&!G.seenDlg[i]){B.dialog=DLG[i].map(([n,t])=>[n==='ผู้พเนจร'?G.hero.name:n,t]);B.phase='dialog';}
   app.innerHTML=battleShell();window.scrollTo(0,0);sfx('gong');startMusic();if(B.dialog)renderPanel();else startRound();
 }
+// stage & enemy levels shown on the player's scale (stats still use the real stage level)
+const dispLv=lv=>Math.max(1,Math.round(lv*0.86));
 const BU=id=>B.units.find(u=>u.id===id);
 const side=s=>B.units.filter(u=>u.side===s);
 const alive=s=>side(s).filter(u=>u.alive);
@@ -2304,7 +2315,7 @@ function log(t){B.logs.unshift(t);}
 const BG_HAVE=[1,2,3,4,5,6,7,8,9];const stageBg=st=>{if(st.arena)return 'sprites/bgarena.webp';if(st.weekly)return 'sprites/bgweekly.webp';if(st.dungeon)return 'sprites/bgcave_'+st.dungeon.el+'.webp';if(st.tower)return 'sprites/bgtower.webp';let c=st.ch||1;while(c>1&&!BG_HAVE.includes(c))c--;return c<=3?'sprites/bg'+c+'n.webp':'sprites/bg'+c+'.webp';};
 function battleShell(){
   return `<header class="b-top"><div><p class="eyebrow">${B.stage.arena?'ลานประลอง · '+arRank(B.stage.opp.rating)+' '+B.stage.opp.rating:B.stage.wild?'แผนที่ · '+(B.stage.ch?CHAPTERS[B.stage.ch]:''):B.stage.tower?'หอท้าประลอง':'บทที่ '+B.stage.ch+' · ด่าน '+(B.i+1)+(B.stage.heroic?' · โหมดยาก':'')}</p><h1>${B.stage.name}</h1></div><div class="btog"><span class="round" id="round"></span>
-    <button data-act="auto" id="tAuto" aria-pressed="${G.settings.auto}">อัตโนมัติ</button><button data-act="autoItem" id="tItem" aria-pressed="${!!G.settings.autoItem}">${AI_T[G.settings.autoItem||0]}</button><button data-act="fast" id="tFast" aria-pressed="${spdLv()>1}">ความเร็ว ×${spdLv()}</button>${B.units.some(x=>x.side==='E'&&x.recruitable)?`<button data-act="autoRecr" id="tRecr" aria-pressed="${!!G.settings.autoRecr}">${G.settings.autoRecr?'จับขุนพล: เปิด':'จับขุนพล: ปิด'}</button>`:''}<button data-act="sound" id="tSound" aria-pressed="${G.settings.sound}" aria-label="เสียง">${G.settings.sound?'เสียง':'ปิดเสียง'}</button></div></header>
+    <button data-act="auto" id="tAuto" aria-pressed="${G.settings.auto}" aria-label="เล่นอัตโนมัติ">ออโต้</button><button data-act="autoItem" id="tItem" aria-pressed="${!!G.settings.autoItem}">${AI_T[G.settings.autoItem||0]}</button><button data-act="fast" id="tFast" aria-pressed="${spdLv()>1}">เร็ว ×${spdLv()}</button>${B.units.some(x=>x.side==='E'&&x.recruitable)?`<button data-act="autoRecr" id="tRecr" aria-pressed="${!!G.settings.autoRecr}" aria-label="จับขุนพลอัตโนมัติ">${G.settings.autoRecr?'จับ: เปิด':'จับ: ปิด'}</button>`:''}<button data-act="sound" id="tSound" aria-pressed="${G.settings.sound}" aria-label="เสียง">${G.settings.sound?'🔊':'🔇'}</button></div></header>
   <div class="wheel">ธาตุชนะทาง: ${badge('earth')}›${badge('water')}›${badge('fire')}›${badge('wind')}›${badge('earth')} <span>×1.5 · ✦ = เกลี้ยกล่อมได้</span></div>
   <div class="order" id="order"></div>
   <div class="field hasbg" id="field" style="background-image:linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.18)),url(${stageBg(B.stage)})"><div id="rows"></div><div id="fx"></div></div>
@@ -2579,7 +2590,7 @@ function unitHTML(u){
   const s=(lookOf(u).s||1);
   return `<div class="${cls.join(' ')}" data-id="${u.id}" style="left:${u._x+(u._ox||0)}%;top:${u._y+(u._oy||0)}%;z-index:${Math.round((u._y+(u._oy||0))*2)+(u._ox?5:0)}" ${tgt?'data-act="tgt" tabindex="0" role="button"':''} aria-label="${esc(u.name)} HP ${u.hp}/${u.maxHp}">
     ${sprOf(u)?`<div class="fig spr" style="margin-top:${Math.round(3-sprTop(u))}px"><div class="ring"></div><div class="sheet" data-id="${u.id}" style="${sheetStyle(u)}"></div></div>`:`<div class="fig" style="--s:${s}"><div class="ring"></div>${spriteSVG(u)}</div>`}
-    <div class="plate"><div class="pn">${badge(u.el)}${u.lv?`<span class="u-lv">Lv${u.lv}</span>`:''}<span class="u-name">${esc(u.name)}</span></div>
+    <div class="plate"><div class="pn">${badge(u.el)}${u.lv?`<span class="u-lv">Lv${u.side==='E'&&!B.stage.arena&&!B.stage.trial?dispLv(u.lv):u.lv}</span>`:''}<span class="u-name">${esc(u.name)}</span></div>
       <div class="bar hp ${hpP<30?'low':''}"><i style="width:${hpP}%"></i></div>
       ${u.side==='A'?`<div class="bar mp"><i style="width:${u.maxMp?u.mp/u.maxMp*100:0}%"></i></div>`:''}</div>
     <div class="u-tags">${tags.join(' · ')}</div>${tgt?'<div class="hitbox"></div>':''}</div>`;
@@ -2599,7 +2610,7 @@ const comboReady=()=>B.gauge>=100&&BROTHERS.every(id=>{const u=BU(id);return u&&
 function nextOpts(){
   const st=B.stage,i=B.i,win=B.result==='win',o={};
   if(st.weekly||st.arena||st.wild||st.npc||st.dungeon||st.trial)return o;
-  if(st.tower){o.next=G.cleared>=4&&G.tower.best<TOWER_MAX;o.nextT=win?`ขึ้นชั้น ${G.tower.best+1}`:`สู้ชั้น ${G.tower.best+1} อีกครั้ง`;return o;}
+  if(st.tower){o.next=fOpen('tower')&&G.tower.best<TOWER_MAX;o.nextT=win?`ขึ้นชั้น ${G.tower.best+1}`:`สู้ชั้น ${G.tower.best+1} อีกครั้ง`;return o;}
   if(i<0)return o;
   if(st.legend){o.again=true;o.againT='สู้ด่านเดิม';if(win&&G.heroic[i+1]&&STAGES[i+1]){o.next=true;o.nextT='ด่านตำนานถัดไป ▶';}return o;}
   if(st.heroic){o.again=i<G.cleared;o.againT='สู้ด่านเดิม';if(win&&i+1<G.cleared&&STAGES[i+1]){o.next=true;o.nextT='ด่านยากถัดไป ▶';}return o;}
@@ -2661,6 +2672,7 @@ function renderPanel(){
   const tip=B.i===0&&G.cleared===0&&!B.stage.heroic?`<p class="tuto">💡 สั่งทีละคนตามลำดับ: กด <b>โจมตี</b> แล้วแตะศัตรูที่มีวงกะพริบ · <b>สกิล</b> ใช้ MP แรงกว่า · ธาตุที่ชนะทางทำดาเมจ ×1.5 · ขี้เกียจสั่ง กด <b>อัตโนมัติ</b> ด้านบนได้</p>`:'';
   p.innerHTML=`${cbar}${tip}<p class="who">คำสั่งของ ${esc(u.name)}${warn}</p>
    <div class="cmds">
+    ${B.lastActs&&Object.keys(B.lastActs).length?`<button class="wide rep" data-act="cmd" data-c="repeat">↻ สั่งเหมือนเทิร์นก่อน<small>ใช้กับ ${B.queue.filter(id=>!B.actions[id]).length} คนที่ยังไม่สั่ง · เป้าหมายล้มแล้วจะตีตัวเลือดน้อยสุดแทน</small></button>`:''}
     ${BROTHERS.includes(u.id)&&comboReady()?`<button class="combo" data-act="cmd" data-c="combo">สาบานสวนท้อ<small style="color:var(--crit)">สามพี่น้องร่วมโจมตีข้าศึกทุกตัว ใช้เทิร์นของทั้งสามคน</small></button>`:''}
     <button data-act="cmd" data-c="atk">โจมตี<small>ตีปกติ 1 เป้าหมาย</small></button>
     <button data-act="cmd" data-c="skill" ${u.skills.some(canUse)?'':'disabled'}>สกิล<small>${u.skills.map(k=>SK[k].name).join(' · ')}</small></button>
@@ -2930,8 +2942,8 @@ function autoRest(){
     B.actions[bu]=it;if(t.alive)C.ph[t.id]=(C.ph[t.id]||0)+amt;}
   B.idx=B.queue.length;resolve();
 }
-const AI_T=['ยา: ปิด','ยา: อัตโนมัติ','ยา+คืนชีพ'];
-function syncToggles(){const ti=$('tItem');if(ti){ti.setAttribute('aria-pressed',!!G.settings.autoItem);ti.textContent=AI_T[G.settings.autoItem||0];}const a=$('tAuto'),f=$('tFast'),so=$('tSound');if(a)a.setAttribute('aria-pressed',G.settings.auto);if(f){f.setAttribute('aria-pressed',spdLv()>1);f.textContent='ความเร็ว ×'+spdLv();}if(so){so.setAttribute('aria-pressed',G.settings.sound);so.textContent=G.settings.sound?'เสียง':'ปิดเสียง';}}
+const AI_T=['ยา: ปิด','ยา: ออโต้','ยา+ชุบชีวิต'];
+function syncToggles(){const ti=$('tItem');if(ti){ti.setAttribute('aria-pressed',!!G.settings.autoItem);ti.textContent=AI_T[G.settings.autoItem||0];}const a=$('tAuto'),f=$('tFast'),so=$('tSound');if(a)a.setAttribute('aria-pressed',G.settings.auto);if(f){f.setAttribute('aria-pressed',spdLv()>1);f.textContent='เร็ว ×'+spdLv();}if(so){so.setAttribute('aria-pressed',G.settings.sound);so.textContent=G.settings.sound?'🔊':'🔇';}}
 /* ---- sound (synthesized, no files) ---- */
 const SND={ctx:null,music:null};
 function actx(){
@@ -2977,6 +2989,15 @@ function startMusic(){
 }
 function stopMusic(){if(SND.music){clearInterval(SND.music);SND.music=null;}}
 function target(label,valid,done){B.targeting={label,valid,done};renderAll();}
+function repeatLast(){
+  const L=B.lastActs||{},foes=alive('E');if(!foes.length)return;
+  const pickT=id=>{const t=BU(id);return t&&t.alive&&t.side==='E'?t.id:foes.slice().sort((a,b)=>a.hp-b.hp)[0].id;};
+  if(L.__combo&&comboReady()){BROTHERS.forEach(b=>B.actions[b]={type:'comboPart'});const lead=B.queue.find(id=>BROTHERS.includes(id));if(lead)B.actions[lead]={type:'combo'};}
+  for(const id of B.queue){if(B.actions[id])continue;const u=BU(id),a=L[id];let n={type:'attack',target:pickT(a&&a.target)};
+    if(a&&a.type==='defend')n={type:'defend'};
+    else if(a&&a.type==='skill'&&u.skills.includes(a.key)&&u.mp>=uCost(u,a.key)&&SK[a.key].tgt!=='dead')n=SK[a.key].tgt==='enemy'?{type:'skill',key:a.key,target:pickT(a.target)}:{type:'skill',key:a.key};
+    B.actions[id]=n;}
+  B.idx=B.queue.length;B.skillMenu=false;B.itemMenu=false;B.targeting=null;resolve();}
 function battleCmd(c){
   const u=BU(B.queue[B.idx]);
   const set=a=>{B.actions[u.id]=a;nextCmd();};
@@ -2990,6 +3011,7 @@ function battleCmd(c){
     case 'itback':B.itemMenu=false;return renderPanel();
     case 'recruit':return target('เลือกขุนพลที่จะเกลี้ยกล่อม',t=>foe(t)&&t.recruitable,t=>set({type:'recruit',target:t.id}));
     case 'flee':return set({type:'flee'});
+    case 'repeat':return repeatLast();
     case 'combo':BROTHERS.forEach(id=>B.actions[id]={type:'comboPart'});B.actions[u.id]={type:'combo'};return nextCmd();
     case 'back':return backCmd();
     case 'cancel':B.targeting=null;return renderAll();
@@ -3211,6 +3233,7 @@ function allyAct(u,a){
 const spdLv=()=>G&&G.settings?(G.settings.spd||(G.settings.fast?2:1)):1;
 const bsleep=ms=>sleep(ms*[1,0.4,0.2][spdLv()-1]);
 async function resolve(){
+  if(!G.settings.auto){const L={};for(const id in B.actions){const a=B.actions[id];if(!a)continue;if(a.type==='combo')L.__combo=1;if(['attack','skill','defend'].includes(a.type))L[id]={type:a.type,key:a.key,target:a.target};}B.lastActs=L;}
   B.phase='resolve';B.activeId=null;B.targeting=null;renderAll();
   const list=[];
   alive('A').forEach(u=>{const a=B.actions[u.id];if(!a||a.type==='comboPart')return;
@@ -3564,7 +3587,7 @@ function renderMapPanel(){
   if(!e){h=`<p class="who">${M.name} <small>ศัตรู Lv ${M.lv[0]}–${M.lv[1]}</small></p>
     <p class="maphint">แตะพื้นเพื่อเดิน · หญ้าสูงมีศัตรูซุ่มอยู่ บางครั้งมีขุนพลพเนจรปนมา · ✦ คือขุนพลที่ท้าประลองและจับได้ · ธงคือด่านเนื้อเรื่อง</p>`;}
   else if(e.t==='stage'){const s=STAGES[e.i],lock=e.i>G.cleared,done=e.i<G.cleared;
-    h=`<p class="who">ด่าน ${e.i+1} · ${s.name}<small>แนะนำ Lv ${s.lv}</small></p><p class="maphint">${lock?'ยังไม่ปลดล็อก ผ่านด่านก่อนหน้าก่อน':s.desc}</p>
+    h=`<p class="who">ด่าน ${e.i+1} · ${s.name}<small>แนะนำ Lv ${dispLv(s.lv)}</small></p><p class="maphint">${lock?'ยังไม่ปลดล็อก ผ่านด่านก่อนหน้าก่อน':s.desc}</p>
       <div class="cmds">${lock?'':`<button class="wide primary" data-act="mapFight" data-i="${e.i}">${done?'สู้อีกครั้ง':'ออกศึก'}</button>`}${done?`<button class="wide heroic" data-act="mapFightH" data-i="${e.i}">${G.heroic[e.i]?'★ ':''}โหมดยาก · Lv ${heroicStage(e.i).lv}</button>`:''}</div>`;}
   else if(e.t==='npc'){const g=GEN[e.g];
     h=`<p class="who">${g.name} ${badge(g.el)}<small>Lv ${M.lv[1]}</small></p><p class="maphint">${g.bio} · ชนะแล้วยังไม่ได้ตัว ต้องใช้คำสั่งเกลี้ยกล่อมระหว่างสู้</p>
@@ -3572,7 +3595,7 @@ function renderMapPanel(){
   else if(e.t==='camp')h=`<p class="who">ค่ายพัก</p><p class="maphint">จัดทีม แจกแต้ม และดูภารกิจ</p><div class="cmds"><button class="wide primary" data-act="mapClose">เข้าค่ายพัก</button></div>`;
   else if(e.t==='shop')h=`<p class="who">ร้านค้า</p><p class="maphint">ซื้อของ ตีบวก คราฟต์ และขายอุปกรณ์</p><div class="cmds"><button class="wide primary" data-act="mapTo" data-k="shop">เข้าร้าน</button></div>`;
   else if(e.t==='exped')h=`<p class="who">กระดานสำรวจ</p><p class="maphint">ส่งขุนพลนอกทีมออกสำรวจ${expDone()?` · กลับมาแล้ว ${expDone()} คน`:''}</p><div class="cmds"><button class="wide primary" data-act="mapTo" data-k="exped">เปิดกระดาน</button></div>`;
-  else if(e.t==='tower'){const open=G.cleared>=4,nf=Math.min(TOWER_MAX,G.tower.best+1);
+  else if(e.t==='tower'){const open=fOpen('tower'),nf=Math.min(TOWER_MAX,G.tower.best+1);
     h=`<p class="who">หอท้าประลอง<small>ชั้นสูงสุด ${G.tower.best} · ไม่มีชั้นสุดท้าย</small></p><p class="maphint">${open?`ชั้นถัดไป ${nf} · ศัตรู Lv ${towerStage(nf).lv}`:'ปลดล็อกเมื่อจบบทที่ 1'}</p>
       <div class="cmds">${open?`<button class="wide primary" data-act="tower">ท้าชั้น ${nf}</button>`:''}</div>`;}
   else if(e.t==='gate')h=`<p class="who">ทางไป${MAPS[e.to].name}</p><p class="maphint">${regionOpen(e.to)?'':`ปลดล็อกเมื่อผ่านด่าน ${MAPS[e.to].unlock}`}</p>${regionOpen(e.to)?`<div class="cmds"><button class="wide primary" data-act="mapGo" data-r="${e.to}">เดินทาง</button></div>`:''}`;
@@ -3614,11 +3637,11 @@ const H={
     importSave(x.g);},
   titleGo:()=>{UI.title=false;render();window.scrollTo(0,0);},
   start:()=>{const n=($('heroName').value||'').trim()||'ผู้พเนจร';newGame(n.slice(0,12),UI.el);save();UI.tab='stage';render();},
-  tab:d=>{UI.quickMsg=null;UI.confirmEl=null;UI.sweepMsg=null;UI.tab=d.k;UI.confirmGacha=null;UI.confirmSkR=null;UI.confirmStR=false;UI.stMsg=null;UI.skMsg=null;UI.skMsgAll=null;UI.expMsg=null;UI.expPick=null;UI.confirmRecall=null;UI.confirmReset=false;UI.sel=null;UI.eq=null;UI.forgeMsg=null;UI.confirmReb=null;render();},
+  tab:d=>{UI.sys=false;UI.quickMsg=null;UI.confirmEl=null;UI.sweepMsg=null;UI.tab=d.k;UI.confirmGacha=null;UI.confirmSkR=null;UI.confirmStR=false;UI.stMsg=null;UI.skMsg=null;UI.skMsgAll=null;UI.expMsg=null;UI.expPick=null;UI.confirmRecall=null;UI.confirmReset=false;UI.sel=null;UI.eq=null;UI.forgeMsg=null;UI.confirmReb=null;render();},
   fight:d=>startBattle(+d.i),
   fightL:d=>{const i=+d.i;if(!G.heroic[i])return;startBattle(i,legendStage(i));},
   fightH:d=>{const i=+d.i;if(i>=G.cleared)return;startBattle(i,heroicStage(i));},
-  tower:()=>{if(G.cleared<4)return;startBattle(-1,towerStage(Math.min(TOWER_MAX,G.tower.best+1)));},
+  tower:()=>{if(!fOpen('tower'))return;startBattle(-1,towerStage(Math.min(TOWER_MAX,G.tower.best+1)));},
   row:d=>{},
   slot:d=>{
     const r=d.r,i=+d.i,F=G.formation,sel=UI.sel;
@@ -3724,7 +3747,7 @@ const H={
   autoItem:()=>{G.settings.autoItem=((G.settings.autoItem||0)+1)%3;save();syncToggles();},
   auto:()=>{G.settings.auto=!G.settings.auto;save();syncToggles();if(B&&B.phase==='command'&&!B.result&&G.settings.auto)autoRest();},
   logAll:()=>{UI.logAll=!UI.logAll;const t=$('logTog');if(t)t.textContent=UI.logAll?'ย่อบันทึก ▴':'บันทึกทั้งหมด ▾';renderField();},
-  autoRecr:()=>{G.settings.autoRecr=!G.settings.autoRecr;save();const b=$('tRecr');if(b){b.setAttribute('aria-pressed',G.settings.autoRecr);b.textContent=G.settings.autoRecr?'จับขุนพล: เปิด':'จับขุนพล: ปิด';}},
+  autoRecr:()=>{G.settings.autoRecr=!G.settings.autoRecr;save();const b=$('tRecr');if(b){b.setAttribute('aria-pressed',G.settings.autoRecr);b.textContent=G.settings.autoRecr?'จับ: เปิด':'จับ: ปิด';}},
   fast:()=>{G.settings.spd=spdLv()%3+1;G.settings.fast=G.settings.spd>1;save();syncToggles();if(SND.music)startMusic();},
   sound:()=>{G.settings.sound=!G.settings.sound;save();syncToggles();if(G.settings.sound&&B&&!B.result)startMusic();else stopMusic();},
   claim:d=>{const q=G.daily.quests[+d.i];if(!q||q.claimed||q.prog<q.n)return;q.claimed=true;const r=q.reward;G.gold+=r.gold||0;G.items.stone+=r.stone||0;G.items.wine+=r.wine||0;sfx('coin');save();render();},
@@ -3756,7 +3779,9 @@ const H={
     UI.forgeMsg={ok:(x.plus||0)>p0,text:`ตีอัตโนมัติ ${GEAR[x.id].name}: +${p0} → <b>+${x.plus||0}</b> · ${why} · ตี ${st.n} ครั้ง สำเร็จ ${st.ok} ล้มเหลว ${st.bad}${st.drop?` (ลดขั้น ${st.drop})`:''}${st.charm?` · ใช้ยันต์ ${st.charm}`:''}${st.bless?` · ใช้หินสวรรค์ ${st.bless}`:''} · ใช้หิน ${st.stone} ตำลึง ${st.gold.toLocaleString()}`};
     save();forgeFx({ok:(x.plus||0)>p0,kind:(x.plus||0)>p0?'ok':(x.plus||0)<p0?'drop':'keep',name:GEAR[x.id].name,from:p0,to:x.plus||0,auto:st});},
   bagGr:d=>{UI.bagGr=+d.v;render();},
-  bag:()=>{UI.bag=!UI.bag;render();},
+  bag:()=>{UI.bag=!UI.bag;if(UI.bag)UI.sys=false;render();},
+  sys:()=>{UI.sys=!UI.sys;if(UI.sys)UI.bag=false;UI.confirmReset=false;render();},
+  heroTab:d=>{UI.heroTab=d.k;render();},
   forge:d=>{
     if(UI.forging)return;const x=gearByUid(+d.u);if(!x)return;const p=x.plus||0;if(p>=PLUS_MAX)return;const c=forgeCost(p);
     if(G.gold<c.gold||G.items.stone<c.stone)return;
@@ -3803,9 +3828,9 @@ const H={
   arUp:()=>{const un=arUnclaimed();if(!un.length)return;un.forEach(i=>{giveRw(AR_UP[i]);G.arena.rkGot.push(i);});UI.arMsg=`รับรางวัลเลื่อนขั้น ${un.map(i=>AR_RANKS[i][1]).join(', ')}: ${un.map(i=>rwText(AR_UP[i])).join(' + ')}`;save();render();},
   arBuy:d=>{ensureArena();const A=G.arena,x=AR_SHOP[+d.i];if(!x||(A.coin||0)<x.c)return;A.coin-=x.c;G.items[x.k]=(G.items[x.k]||0)+(x.n||1);UI.arMsg=`แลก ${ITEMS[x.k].name}${x.n?' ×'+x.n:''} แล้ว (เหลือ ${A.coin} เหรียญ)`;save();render();},
   toggleArena:()=>{UI.showArena=!UI.showArena;if(UI.showArena)ensureArena();render();},
-  arFight:d=>{ensureArena();const A=G.arena,o=A.opps[+d.i];if(!o||G.cleared<4||A.used>=arMax())return;A.used++;save();startBattle(-1,arenaStage(o));},
+  arFight:d=>{ensureArena();const A=G.arena,o=A.opps[+d.i];if(!o||!fOpen('arena')||A.used>=arMax())return;A.used++;save();startBattle(-1,arenaStage(o));},
   arRefresh:()=>{if(G.gold<200)return;ensureArena();G.gold-=200;G.arena.opps=genOpps();save();render();},
-  wkFight:()=>{ensureWeekly();if(G.cleared<14||G.weekly.used>=WK_TRIES)return;G.weekly.used++;save();startBattle(-1,weeklyStage());},
+  wkFight:()=>{ensureWeekly();if(!fOpen('weekly')||G.weekly.used>=WK_TRIES)return;G.weekly.used++;save();startBattle(-1,weeklyStage());},
   wkClaim:d=>{const i=+d.i,W=G.weekly;if(W.claimed.includes(i)||W.total<WK_MILE[i][0])return;const r=WK_MILE[i][1];
     W.claimed.push(i);G.gold+=r.gold||0;G.items.soul+=r.soul||0;G.items.brk+=r.brk||0;G.items.stone+=r.stone||0;if(r.gear)addGear(r.gear);sfx('coin');save();render();},
   rebGen:d=>{
@@ -3839,7 +3864,7 @@ const H={
   zhen:d=>{if(!ZHEN[d.k]||ZHEN[d.k].u>G.cleared)return;G.zhen=d.k;save();render();},
   toggleDg:()=>{UI.showDg=!UI.showDg;render();},
   dgEl:d=>{UI.dgEl=d.k;render();},
-  dgFight:d=>{ensureDungeon();const L=DG_LV[+d.d];if(!L||G.cleared<L.u||G.dungeon.used>=DG_TRIES)return;startBattle(-1,dungeonStage(+d.d));},
+  dgFight:d=>{ensureDungeon();const L=DG_LV[+d.d];if(!L||!fOpen('dungeon')||G.cleared<L.u||G.dungeon.used>=DG_TRIES)return;startBattle(-1,dungeonStage(+d.d));},
   camp:()=>{stopMusic();const fm=B&&B.fromMap;B=null;UI.eq=null;if(fm){UI.map=true;MV.flash=0;render();return;}if(UI.backTab){UI.tab=UI.backTab;UI.backTab=null;render();setTimeout(()=>{const e=document.getElementById('rebSec')||document.querySelector('.grow.open');if(e)e.scrollIntoView({block:'start'});},30);return;}UI.tab='stage';render();window.scrollTo(0,0);},
   mapOpen:()=>{mapInit();UI.map=true;UI.mapHere=null;render();window.scrollTo(0,0);},
   mapClose:()=>{UI.map=false;UI.mapHere=null;save();render();window.scrollTo(0,0);},
