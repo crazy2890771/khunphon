@@ -1816,9 +1816,10 @@ const costOk=c=>G.gold>=c.gold&&Object.entries(c.mats).every(([k,v])=>(G.mats[k]
 const costHTML=c=>[`<span class="${G.gold>=c.gold?'cok':'cno'}">${ico('coin',14)} ${G.gold.toLocaleString()}/${c.gold.toLocaleString()}</span>`,...Object.entries(c.mats).map(([k,v])=>`<span class="${(G.mats[k]||0)>=v?'cok':'cno'}">${ico('m_'+k,14)} ${MATS[k].name} ${G.mats[k]||0}/${v}</span>`),...Object.entries(c.items).map(([k,v])=>`<span class="${(G.items[k]||0)>=v?'cok':'cno'}">${ico(k,14)} ${ITEMS[k].name} ${G.items[k]||0}/${v}</span>`)].join('');
 const payCost=c=>{G.gold-=c.gold;for(const k in c.mats)G.mats[k]-=c.mats[k];for(const k in c.items)G.items[k]-=c.items[k];};
 const trialOk=o=>(o.trialDone||0)>=(o.reborn||0)+1;
+const TRIAL_K={hpH:2.8,atkH:1.08,hpG:1.6,atkG:1.05};
 function trialStage(id){const isH=id==='hero',o=memberObj(id),s=memberStats(id),rb=(o.reborn||0)+1,nm=isH?G.hero.name:GEN[id].name,el=isH?G.hero.el:GEN[id].el;
   const skl=isH?HERO_SK[el].filter(x=>o.lv>=x[1]).map(x=>x[0]).pop():(GEN_SK[id]||[]).map(x=>x[0]).pop();
-  const k=1+0.1*(rb-1),sh={hp:Math.round(s.hp*1.0*k),mp:s.mp,atk:Math.round(s.atk*(isH?0.72:0.95)*k),def:Math.round(s.def*0.8*k),spd:s.spd-4};
+  const T=TRIAL_K,k=1+0.1*(rb-1),sh={hp:Math.round(s.hp*(isH?T.hpH:T.hpG)*k),mp:s.mp,atk:Math.round(s.atk*(isH?T.atkH:T.atkG)*k),def:Math.round(s.def*0.8*k),spd:s.spd-4};
   const minion=(nmm,e)=>({key:isH?'hero':id,name:nmm,el:e,row:'back',ranged:true,st:{hp:Math.round(s.hp*0.3*k),mp:0,atk:Math.round(s.atk*0.3*k),def:Math.round(s.def*0.5),spd:s.spd-10}});
   const beats=Object.keys(ELS).find(e=>ELS[e].beats===el)||el;
   return {name:`ศึกทดสอบจุติขั้น ${rb} · ${nm}`,ch:Math.min(9,2+rb*2),lv:o.lv,mul:1,front:[],back:[],exp:0,gold:0,trial:id,solo:id,
@@ -2256,6 +2257,10 @@ const DLG={
  41:[['จงโฮย','ด่านเกียมโก๊ะก็แค่กำแพงหิน ทัพสิบหมื่นของข้าจะบดมันเป็นผง'],['ผู้พเนจร','ผาสูงแห่งนี้ ทหารหนึ่งคนกันทัพหมื่นได้ มาเลย!']],
  42:[['เตงงาย','ข้าห่อตัวด้วยผ้าห่ม ไถลลงผาอิมเป๋งมาได้ ใครจะหยุดข้าได้อีก'],['ผู้พเนจร','ข้าเอง! เฉิงตูอยู่ข้างหลังข้า เจ้าผ่านไปไม่ได้!']],
  43:[['สุมาเจียว','ใจของสุมาเจียว คนเดินถนนก็รู้ แผ่นดินนี้จะเป็นของตระกูลสุมา'],['เกียงอุย','ตราบที่ยังมีลมหายใจ ข้าจะไม่ยอมให้จ๊กล่ม'],['ผู้พเนจร','ทุกศึกที่ผ่านมาพาข้ามาถึงวันนี้ ศึกสุดท้าย บุก!']]};
+// enemy power tuned for the smarter auto AI (ramps in after the tutorial chapter)
+const DIFF={hp:1.35,atk:1.22,tw:0.6};
+function diffOf(st){if(st.arena||st.weekly||st.trial)return {hp:1,atk:1};
+  const r=st.tower?DIFF.tw:Math.min(1,Math.max(0,((st.ch||1)-1)/2));return {hp:1+(DIFF.hp-1)*r,atk:1+(DIFF.atk-1)*r};}
 function startBattle(i,stage){syncHeroSpr();
   const st=fillStage(stage||STAGES[i],i),units=[],mul=st.mul||1;
   if(!st.solo||st.solo==='hero')units.push(mk({id:'hero',lv:G.hero.lv,name:G.hero.name,el:G.hero.el,row:G.hero.row,skills:skillsFor('hero',G.hero.lv),...memberStats('hero'),side:'A',isHero:true}));
@@ -2278,6 +2283,7 @@ function startBattle(i,stage){syncHeroSpr();
   const add=(key,row)=>{const t=FOE[key]||GEN[key],bs=scale(statsAt(t.base,st.lv),mul);
     if(chx>1){if(t.boss){bs.hp=Math.round(bs.hp*(chx>=5?0.7:chx>=3?0.85:1));}else{const f=1+0.16*(chx-1);bs.hp=Math.round(bs.hp*f);bs.def=Math.round(bs.def*(1+0.05*(chx-1)));bs.atk=Math.round(bs.atk*(1+0.04*(chx-1)));}}
     const gb=!t.boss&&GEN[key]&&st.hard&&!st.tower&&!st.arena&&!st.weekly&&(st.ch||1)>=2;if(gb){bs.hp=Math.round(bs.hp*1.8);}
+    {const df=diffOf(st);bs.hp=Math.round(bs.hp*df.hp);bs.atk=Math.round(bs.atk*df.atk);}
     units.push(mk({id:'e'+(n++),lv:st.lv,key,name:t.name,el:t.el,row,sk:t.sk,ranged:t.ranged,boss:t.boss||gb,gb,...bs,mp:0,side:'E',recruitable:!st.tower&&!st.heroic&&!st.dungeon&&!!GEN[key]&&!G.roster[key]}));};
   st.back.forEach(k=>add(k,'back'));st.front.forEach(k=>add(k,'front'));
   if(st.trial)st.team.forEach(t=>units.push(mk({id:'e'+(n++),lv:st.lv,key:t.key,name:t.name,el:t.el,row:t.row,sk:t.sk,ranged:t.ranged,boss:!!t.boss,...t.st,side:'E',recruitable:false,bot:true})));
